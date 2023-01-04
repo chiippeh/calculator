@@ -1,3 +1,7 @@
+const calculatorButton = document.querySelectorAll('.calc-btn');
+const displayDiv = document.querySelector('.num-display');
+let displayValue = "";
+
 function add (a, b) {
   return a + b
 }
@@ -29,4 +33,14 @@ function operate (operator, num1, num2) {
     }
 }
 
-console.log(operate('/',3,7));
+function displayButtonClick (e) {
+  displayValue += this.value;
+  if (displayDiv.textContent === "|") {
+    displayDiv.textContent = this.value;
+  } else {
+    displayDiv.textContent += this.value;
+  }
+  console.log(displayValue);
+}
+
+calculatorButton.forEach(btn => btn.addEventListener('click', displayButtonClick));
