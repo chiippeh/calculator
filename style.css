@@ -5,6 +5,54 @@
     font-size: 1.2em;
 }
 
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(231, 169, 255);
+}
+
+.calculator-container {
+    background-color: aliceblue;
+    width: 300px;
+}
+
+.calculator-container button {
+    width: 80px;
+    height: 80px;
+}
+
+.row1,.row2,.row3,.row4,.row5 {
+    display: flex;
+}
+
+.row1 {
+    display: flex;
+    font-size: 1em;
+}
+
+.clear-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    flex-wrap: wrap;
+}
+
+.num-display {
+    border: 2px red solid;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 0 15px 0 0;
+    overflow-wrap: normal;
+}
+
+.equal-btn {
+    flex: 2;
+}
+
 img {
     display: block;
     max-width: 100%;
