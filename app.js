@@ -44,11 +44,16 @@ function operatorButtonVisibility (visibility) {
   document.querySelector('.multiply-btn').disabled = visibility
 }
 
+function clearDisplay () {
+  displayDiv.textContent = '|'
+  displayValue = '';
+}
+
 function displayButtonClick (e) {
+  displayDiv.style.fontSize='1.2em';
   console.log(this)
   if (this.classList[1] === 'clear-btn') {
-    displayDiv.textContent = '|'
-    displayValue = 0
+    clearDisplay();
   } else {
     if (/\d/g.test(this.value)) {
       operatorButtonVisibility(false)
@@ -70,35 +75,66 @@ function displayButtonClick (e) {
 }
 
 function parsingInput () {
-  operatorButtonVisibility(false)
-  const regexDigits = /\+|\-|\×|\÷/g
-  const regexOperators = /\d/g
-  let digits = displayValue.split(regexDigits)
-  let operators = displayValue.replace(regexOperators, '').split('')
+  displayDiv.style.fontSize='1.2em';
+  operatorButtonVisibility(false);
+
+  if (displayValue.length == 0) {
+    clearDisplay();
+    console.log(`empty input`);
+    return;
+  }
+
+  const regexOperators = /\+|\-|\×|\÷/g
+  const regexDigits = /\d|\./g
+
+  let digits = displayValue.split(regexOperators);
+
+  //If user inputs only one number and a operator, filter out the blank space from the array
+  digits = digits.filter(el => {
+    console.log(`el = ${el.length}`);
+    if (el.length > 0) {
+      return true; //keep element its length is > 0
+    }
+  });
+
+  let operators = displayValue.replace(regexDigits, '').split('');
+
+  console.log(`digits = ${digits}`);
+  console.log(`operators = ${operators}`);
+  console.log(`dv = ${displayValue}`);
+
   let result = 0
 
-  try {
-    for (let i = 0; i < operators.length; i++) {
-      numAns = operate(operators[i], Number(digits[i]), Number(digits[i + 1]))
-      result = numAns
-      digits[i + 1] = result
-      console.log(`total = ${result}\n`)
-    }
+  if (displayValue.length > 0 && operators.length > 0) {
+    if ((operators.length % 2 != 0 && digits.length % 2 == 0) || (operators.length % 2 == 0 && digits.length % 2 != 0)) {
+      if ((operators.length > 0 && digits.length != 0) || (operators.length != 0 && digits.length > 0)) {
+        console.log(`validddd`);
+        for (let i = 0; i < operators.length; i++) {
+          try {
+            result = operate(operators[i], Number(digits[i]), Number(digits[i + 1]));
 
-    if (operators.length > 0) {
-      if (!Number.isInteger(result)) {
-        result = result.toFixed(2)
+            if (!Number.isInteger(result)) {
+              result = result.toFixed(2);
+            }
+            console.log(`result = ${result}`);
+            displayDiv.textContent = result;
+            displayValue = result;
+          } catch (error) {
+            displayDiv.style.fontSize='0.9em';
+            displayDiv.textContent = error;
+          }
+  
+        }
+      } else {
+        console.log(`display clear 1`);
+        clearDisplay();
       }
-      displayDiv.textContent = result
-    } else {
-      displayDiv.textContent = displayValue
+    } else { //incorrect input
+      console.log(`display clear 2`);
+      clearDisplay();
     }
-
-    console.log(displayValue)
-    console.log(digits)
-    console.log(operators)
-  } catch (error) {
-    displayDiv.textContent = error
+  } else {
+    console.log(`BAD INPUT`);
   }
 }
 
