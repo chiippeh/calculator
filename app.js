@@ -38,10 +38,18 @@ function operate (operator, num1, num2) {
 }
 
 function operatorButtonVisibility (visibility) {
-  document.querySelector('.plus-btn').disabled = visibility
-  document.querySelector('.minus-btn').disabled = visibility
-  document.querySelector('.divide-btn').disabled = visibility
-  document.querySelector('.multiply-btn').disabled = visibility
+  document.querySelector('.plus-btn').disabled = visibility;
+  document.querySelector('.minus-btn').disabled = visibility;
+  document.querySelector('.divide-btn').disabled = visibility;
+  document.querySelector('.multiply-btn').disabled = visibility;
+}
+
+function disableAllButtonsExceptClear (visibility) {
+  const someButtons = [...document.querySelectorAll('.calc-btn')];
+  someButtons.splice(0,1); //remove clear button from array
+  someButtons.forEach (btn => btn.disabled = visibility);
+  
+  document.querySelector('.equal-btn').disabled = visibility; //disable equal button
 }
 
 function clearDisplay () {
@@ -51,6 +59,7 @@ function clearDisplay () {
 
 function displayButtonClick (e) {
   displayDiv.style.fontSize='1.2em';
+  disableAllButtonsExceptClear(false);
   console.log(this)
   if (this.classList[1] === 'clear-btn') {
     clearDisplay();
@@ -112,7 +121,7 @@ function parsingInput () {
         for (let i = 0; i < operators.length; i++) {
           try {
             result = operate(operators[i], Number(digits[i]), Number(digits[i + 1]));
-
+            digits[i+1] = result //Saves result in digit arr to be used for next operation
             if (!Number.isInteger(result)) {
               result = result.toFixed(2);
             }
@@ -121,7 +130,8 @@ function parsingInput () {
             displayValue = result;
           } catch (error) {
             displayDiv.style.fontSize='0.9em';
-            displayDiv.textContent = error;
+            displayDiv.textContent = error; //divide by zero error
+            disableAllButtonsExceptClear(true);
           }
   
         }
