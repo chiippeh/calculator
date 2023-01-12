@@ -4,6 +4,7 @@ const equalsButton = document.querySelector('.equal-btn');
 const displayDiv = document.querySelector('.num-display');
 let displayValue = ''
 let operatorRecentlyPressed = true;
+let userEntryMode = true;
 
 function add (a, b) {
   return a + b;
@@ -43,6 +44,14 @@ function operatorButtonVisibility (visibility) {
   operatorButtons.forEach (btn => btn.disabled = visibility);
 }
 
+function equalSignButtonVisibility (visibility) {
+  document.querySelector('.equal-btn').disabled = visibility;
+}
+
+function backspaceButtonVisibility (visibility) {
+  document.querySelector('.backspace-btn').disabled = visibility;
+}
+
 function decimalButtonVisibility (visibility) {
   document.querySelector('.decimal-btn').disabled = visibility;
 }
@@ -52,7 +61,7 @@ function disableAllButtonsExceptClear (visibility) {
   someButtons.splice(0,1); //remove clear button from array
   someButtons.forEach (btn => btn.disabled = visibility);
   
-  document.querySelector('.equal-btn').disabled = visibility; //disable equal button
+  equalSignButtonVisibility(visibility);
 }
 
 function clearDisplay () {
@@ -68,14 +77,33 @@ function displayButtonClick (e) {
     clearDisplay();
   } else {
     if (/\d/g.test(this.value)) { //if it's a digit
+      userEntryMode = true;
       operatorButtonVisibility(false);
+      backspaceButtonVisibility(false);
       if (operatorRecentlyPressed) { //if operator button pressed recently then reenable decimal button
         decimalButtonVisibility(false);
       } else {
         decimalButtonVisibility(true);
       }
-    } else { //if it's an operator
+    } else if (this.value == '←') { //if backspace button
+      if (userEntryMode && displayDiv.textContent !== '|') {
+        if (displayValue.length == 1) {
+          displayDiv.textContent = '|';
+        } else {
+          displayValue = displayValue.slice(0,-1);
+          displayDiv.textContent = displayValue;
+          if (/\+|\-|\×|\÷/g.test(displayValue.slice(-1, displayValue.length))) { //if the last thing in the display value is an operator then disable equals
+            equalSignButtonVisibility(true);
+          } 
+        }
+      }
+      return;
+    } else { //if it's an operator NOT backspace
+      userEntryMode = true;
       operatorButtonVisibility(true);
+      backspaceButtonVisibility(false);
+      equalSignButtonVisibility(true);
+ 
       if (this.value == '.') { 
         operatorRecentlyPressed = false;
         console.log(`ORP = ${operatorRecentlyPressed}`);
@@ -84,25 +112,24 @@ function displayButtonClick (e) {
       }
     } 
 
+
     if (displayValue != 0) {
-      displayValue += this.value;
+       displayValue += this.value;
     } else {
       displayValue = this.value;
     }
-  
+
     if (displayDiv.textContent === '|') {
       displayDiv.textContent = this.value;
     } else {
       displayDiv.textContent += this.value;
     }
   }
-    
-
-  
- 
 }
 
 function parsingInput () {
+  userEntryMode = false;
+  backspaceButtonVisibility(true);
   console.log(`\n\n$ dv = ${displayValue}\n\n`);
   displayDiv.style.fontSize='1.2em';
   operatorButtonVisibility(false);
