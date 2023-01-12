@@ -55,7 +55,7 @@ body {
 }
 
 .equal-btn {
-    flex: 2;
+    border-width: 4px;
 }
 
 button:hover {

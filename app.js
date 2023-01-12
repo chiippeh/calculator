@@ -1,47 +1,50 @@
-const calculatorButton = document.querySelectorAll('.calc-btn')
-const equalsButton = document.querySelector('.equal-btn')
-const displayDiv = document.querySelector('.num-display')
+const calculatorButton = document.querySelectorAll('.calc-btn');
+const operatorButtons = document.querySelectorAll('.op-btn');
+const equalsButton = document.querySelector('.equal-btn');
+const displayDiv = document.querySelector('.num-display');
 let displayValue = ''
+let operatorRecentlyPressed = true;
 
 function add (a, b) {
-  return a + b
+  return a + b;
 }
 
 function subtract (a, b) {
-  return a - b
+  return a - b;
 }
 
 function multiply (a, b) {
-  return a * b
+  return a * b;
 }
 
 function divide (a, b) {
-  return a / b
+  return a / b;
 }
 
 function operate (operator, num1, num2) {
   switch (operator) {
     case '+':
-      return add(num1, num2)
+      return add(num1, num2);
     case '-':
-      return subtract(num1, num2)
+      return subtract(num1, num2);
     case '×':
-      return multiply(num1, num2)
+      return multiply(num1, num2);
     case '÷':
       if (num2 === 0) {
-        throw "You can't divide by zero.."
+        throw "You can't divide by zero..";
       }
-      return divide(num1, num2)
+      return divide(num1, num2);
     default:
-      break
+      break;
   }
 }
 
 function operatorButtonVisibility (visibility) {
-  document.querySelector('.plus-btn').disabled = visibility;
-  document.querySelector('.minus-btn').disabled = visibility;
-  document.querySelector('.divide-btn').disabled = visibility;
-  document.querySelector('.multiply-btn').disabled = visibility;
+  operatorButtons.forEach (btn => btn.disabled = visibility);
+}
+
+function decimalButtonVisibility (visibility) {
+  document.querySelector('.decimal-btn').disabled = visibility;
 }
 
 function disableAllButtonsExceptClear (visibility) {
@@ -60,33 +63,50 @@ function clearDisplay () {
 function displayButtonClick (e) {
   displayDiv.style.fontSize='1.2em';
   disableAllButtonsExceptClear(false);
-  console.log(this)
+  console.log(this);
   if (this.classList[1] === 'clear-btn') {
     clearDisplay();
   } else {
-    if (/\d/g.test(this.value)) {
-      operatorButtonVisibility(false)
-    } else {
-      operatorButtonVisibility(true)
-    }
-    if (displayValue != 0) {
-      displayValue += this.value
-    } else {
-      displayValue = this.value
-    }
+    if (/\d/g.test(this.value)) { //if it's a digit
+      operatorButtonVisibility(false);
+      if (operatorRecentlyPressed) { //if operator button pressed recently then reenable decimal button
+        decimalButtonVisibility(false);
+      } else {
+        decimalButtonVisibility(true);
+      }
+    } else { //if it's an operator
+      operatorButtonVisibility(true);
+      if (this.value == '.') { 
+        operatorRecentlyPressed = false;
+        console.log(`ORP = ${operatorRecentlyPressed}`);
+      } else {
+        operatorRecentlyPressed = true;
+      }
+    } 
 
-    if (displayDiv.textContent === '|') {
-      displayDiv.textContent = this.value
+    if (displayValue != 0) {
+      displayValue += this.value;
     } else {
-      displayDiv.textContent += this.value
+      displayValue = this.value;
+    }
+  
+    if (displayDiv.textContent === '|') {
+      displayDiv.textContent = this.value;
+    } else {
+      displayDiv.textContent += this.value;
     }
   }
+    
+
+  
+ 
 }
 
 function parsingInput () {
+  console.log(`\n\n$ dv = ${displayValue}\n\n`);
   displayDiv.style.fontSize='1.2em';
   operatorButtonVisibility(false);
-
+  decimalButtonVisibility(false);
   if (displayValue.length == 0) {
     clearDisplay();
     console.log(`empty input`);
@@ -152,3 +172,7 @@ calculatorButton.forEach(btn =>
   btn.addEventListener('click', displayButtonClick)
 )
 equalsButton.addEventListener('click', parsingInput)
+
+
+//TODO
+// Make negative math work
