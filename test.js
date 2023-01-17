@@ -1,6 +1,7 @@
 const numButtons = document.querySelectorAll('.number-btn');
 const opButtons = document.querySelectorAll('.op-btn');
 const equalButton = document.querySelector('.equals-btn');
+const clearButton = document.querySelector('.clear-btn');
 const topScreen = document.querySelector('.top');
 const bottomScreen = document.querySelector('.bottom');
 
@@ -8,61 +9,109 @@ const bottomScreen = document.querySelector('.bottom');
 numButtons.forEach(btn => btn.addEventListener('click', () => parseNumber(btn.textContent)))
 opButtons.forEach(btn =>btn.addEventListener('click', () => parseOperator(btn.textContent)))
 equalButton.addEventListener('click', evaluate);
+clearButton.addEventListener('click', resetDisplay);
+
 
 let firstOperand = '';
 let secondOperand = '';
 let operator = '';
-let operatorEntered = false;
+let equalsPressed = false;
 
 function parseNumber(val) {
-    if (bottomScreen.textContent === '0' || operatorEntered) { // Default start state
-        resetBottomScreen()
+    if (bottomScreen.textContent == '0' && firstOperand == '') { // Default state
+        resetBottomScreen();
+        bottomScreen.textContent += val;
+        firstOperand += val;
+    } else if (topScreen.textContent == '\xA0') { // If operator hasn't been entered
+        bottomScreen.textContent += val;
+        firstOperand += val;
+    } else if (/(\+|\-|\×|\÷)/g.test(topScreen.textContent) && !(equalsPressed)) { // If operator HAS been entered 
+        resetBottomScreen();
+        secondOperand += val;
+        bottomScreen.textContent += secondOperand;
+    } else if (bottomScreen.textContent == secondOperand) { // 
+        bottomScreen.textContent += val;
+        secondOperand += val;
     }
-    bottomScreen.textContent += val;
+    console.log(`1st = ${firstOperand}, 2nd = ${secondOperand}, op = ${operator}`);
 }
 
 function parseOperator(val) {
-    if (bottomScreen.textContent !== '0' && !operatorEntered) { // If no operator has been entered
-        operator = val;
-        operatorEntered = true;
-        evaluate
-    } else { // Second operand has been entered 
+    if (val == '.') { // If val is a decimal
+        if (firstOperand != '') { // If one or more operands has been entered
+            if (/(\+|\-|\×|\÷)/g.test(topScreen.textContent) && !(equalsPressed)) { // If operator HAS been entered 
+                // 2nd operand
+                if (!secondOperand.includes('.')){ // If operand doesn't have a decimal
+                    secondOperand += val;
+                    bottomScreen.textContent += '.';
+                }
+            } else {
+                // 1st operand
+                if (!firstOperand.includes('.')){ // If operand doesn't have a decimal
+                    firstOperand += val;
+                    bottomScreen.textContent += '.';
+                }
+            }
+        }
     }
-    console.log(`Operand = ${operator}`);
+    else if (topScreen.textContent == '\xA0' && bottomScreen.textContent != '0') { //If NO operator has been entered
+        topScreen.textContent += `${firstOperand} ${val}`
+        operator = val;
+    } else if (bottomScreen.textContent == firstOperand) { // If you user wants to change operator
+        equalsPressed = false;
+        operator = val;
+        topScreen.textContent = `${firstOperand} ${val}`
+    } else if (bottomScreen.textContent == secondOperand) { // If user presses operator after another operator before pressing equals
+        firstOperand = evaluate()
+        secondOperand = '';
+        topScreen.textContent = `${firstOperand} ${val}`
+        bottomScreen.textContent = `${firstOperand}`
+    }
+    console.log(`1st = ${firstOperand}, 2nd = ${secondOperand}, op = ${operator}`);
 }
 
 function evaluate(e) { //if equals button pressed
+    if (e == undefined) { // if function NOT called by equals button
+        try {
+            return operate(operator, firstOperand, secondOperand);   
+        } catch (divideZeroError) {
+            alert(divideZeroError);
+            resetDisplay();
+        }
+    } else { // if equals button pressed
+        if (secondOperand != '') { // if second operand has been entered
+            topScreen.textContent = `${firstOperand} ${operator} ${secondOperand} =`;
+            try {
+                firstOperand = operate(operator, firstOperand, secondOperand);  
+                bottomScreen.textContent = `${firstOperand}`;
+                secondOperand = ''
+                operator = ''
+                equalsPressed = true;
+            } catch (divideZeroError) {
+                alert(divideZeroError);
+                resetDisplay();
+            }
+        }
+    }
 }
 
-function displayContent() {
-    // if (operator == '' && secondOperand == '') { //display 1st number on bottom screen
-    //     bottomScreen.textContent = `${firstOperand}`;
-    // }
-
-    // if (operator != '' && secondOperand == '') { //display intermediate expression
-    //     topScreen.textContent = `${firstOperand} ${operator}`;
-    // }
-
-    // if (operator != '' && secondOperand != '') { ///display 2nd number on bottom screen
-    //     bottomScreen.textContent = `${secondOperand}`;
-    // }
-
-
-
-
-}
-
-function resetBottomScreen() {
-    // topScreen.textContent = '\xA0'; //non-breaking space
+function resetBottomScreen () {
     bottomScreen.textContent = '';
 }
-  
-function resetValues() {
+
+function resetDisplay () {
+    topScreen.textContent = '\xA0';
+    bottomScreen.textContent = '0';
+    resetValues();
+}
+
+function resetValues () {
     firstOperand = '';
     secondOperand = '';
     operator = '';
+    equalsPressed = false;
 }
-
+  
 function operate(operator, num1, num2) {
     num1 = Number(num1);
     num2 = Number(num2);
@@ -77,7 +126,12 @@ function operate(operator, num1, num2) {
             if (num2 === 0) {
             throw "You can't divide by zero..";
             }
-            return divide(num1, num2);
+            let temp = divide(num1, num2);
+            if (Number.isInteger(temp)) {
+                return temp;
+            } else {
+                return temp.toFixed(2);
+            }
         default:
             break;
     }
