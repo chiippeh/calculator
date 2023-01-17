@@ -2,15 +2,16 @@ const numButtons = document.querySelectorAll('.number-btn');
 const opButtons = document.querySelectorAll('.op-btn');
 const equalButton = document.querySelector('.equals-btn');
 const clearButton = document.querySelector('.clear-btn');
+const backSpaceButton = document.querySelector('.backspace-btn');
 const topScreen = document.querySelector('.top');
 const bottomScreen = document.querySelector('.bottom');
 
 // Event listeners
-numButtons.forEach(btn => btn.addEventListener('click', () => parseNumber(btn.textContent)))
-opButtons.forEach(btn =>btn.addEventListener('click', () => parseOperator(btn.textContent)))
+numButtons.forEach(btn => btn.addEventListener('click', () => parseNumber(btn.textContent)));
+opButtons.forEach(btn =>btn.addEventListener('click', () => parseOperator(btn.textContent)));
 equalButton.addEventListener('click', evaluate);
 clearButton.addEventListener('click', resetDisplay);
-
+backSpaceButton.addEventListener('click', backSpaceDisplay);
 
 let firstOperand = '';
 let secondOperand = '';
@@ -93,6 +94,23 @@ function evaluate(e) { //if equals button pressed
             }
         }
     }
+}
+
+function backSpaceDisplay () {
+
+    if (firstOperand != '') { // If one or more operands has been entered
+        if (/(\+|\-|\×|\÷)/g.test(topScreen.textContent) && !(equalsPressed)) { // If operator HAS been entered 
+            // 2nd operand
+            bottomScreen.textContent = bottomScreen.textContent.slice(0,-1);
+            secondOperand = String(Number(secondOperand/10));
+        } else {
+            // 1st operand
+            bottomScreen.textContent = bottomScreen.textContent.slice(0,-1);
+            firstOperand = String(Number(firstOperand/10));
+        }
+        
+    }
+    
 }
 
 function resetBottomScreen () {
